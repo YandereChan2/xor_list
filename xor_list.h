@@ -17,22 +17,68 @@ namespace Yc
 		using Node_ptr = Node*;
 		static constexpr size_t node_size = sizeof(T) / sizeof(Node) + (sizeof(T) % sizeof(Node) != 0);
 		using alloc_trait = std::allocator_traits<Alloc>;
-		Alloc alloc{};
+		[[no_unique_address]]Alloc alloc{};
 		Node head{};
 		Node tail{};
 		using rb_alloc = alloc_trait::template rebind_alloc<Node[node_size + 1]>;
-		rb_alloc rb_a{};
+		constexpr rb_alloc rb_a()const
+		{
+			return alloc;
+		}
+		//rb_alloc rb_a{};
 		Node_ptr get_new_node()
 		{
-			return (Node_ptr)rb_a.allocate(1);
+			auto rb_al = rb_a();
+			return (Node_ptr)rb_al.allocate(1);
 		}
 		void delete_node(Node_ptr p)
 		{
-			rb_a.deallocate((decltype(rb_a.allocate(1)))p, 1);
+			auto rb_al = rb_a();
+			rb_al.deallocate((decltype(rb_al.allocate(1)))p, 1);
 		}
 	public:
 		xor_list()noexcept :head{ ((size_t)(Node_ptr{nullptr}))^(size_t)(&tail)},tail{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&head) }
 		{
+		}
+		explicit xor_list(const Alloc& alloc)noexcept(std::is_nothrow_copy_constructible_v<Alloc>) :alloc { alloc }, head{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&tail) }, tail{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&head) }
+		{
+		}
+		xor_list(const xor_list& other) :alloc{alloc_trait::select_on_container_copy_construction(other.get_allocator())},head { ((size_t)(Node_ptr{ nullptr })) ^ (size_t)(&tail) }, tail{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&head) }
+		{
+			for (auto& i : other)
+			{
+				push_back(i);
+			}
+		}
+		xor_list(xor_list&& other)noexcept :alloc{std::move(other.alloc)}, head{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&tail) }, tail{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&head) }
+		{
+			splice(begin(), other);
+		}
+		xor_list(std::initializer_list<T>lst, const Alloc& alloc = Alloc()) :alloc{ alloc }, head{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&tail) }, tail{ ((size_t)(Node_ptr{nullptr})) ^ (size_t)(&head) }
+		{
+			for (auto& t : lst)
+			{
+				push_back(std::move(t));
+			}
+		}
+		xor_list& operator=(const xor_list& other)
+		{
+			if (this == std::addressof(other))
+			{
+				return *this;
+			}
+			this->~xor_list();
+			new(this)xor_list(other);
+			return *this;
+		}
+		xor_list& operator=(xor_list&& other)noexcept(noexcept(swap(other)))
+		{
+			swap(other);
+			return *this;
+		}
+		constexpr Alloc get_allocator()const
+		{
+			return alloc;
 		}
 		bool empty()const noexcept
 		{
@@ -42,7 +88,7 @@ namespace Yc
 		{
 			Node_ptr last, current;
 			friend xor_list;
-			auto node_info()const noexcept
+			constexpr auto node_info()const noexcept
 			{
 				struct
 				{
@@ -54,44 +100,44 @@ namespace Yc
 				return ret;
 			}
 		public:
-			iterator(Node_ptr last,Node_ptr current)noexcept:last{last},current{current}
+			constexpr iterator(Node_ptr last,Node_ptr current)noexcept:last{last},current{current}
 			{}
-			iterator() = default;
-			iterator& operator++()noexcept
+			constexpr iterator() = default;
+			constexpr iterator& operator++()noexcept
 			{
 				Node_ptr tmp = current;
 				current = (Node_ptr)((current->p) ^ ((size_t)(last)));
 				last = tmp;
 				return *this;
 			}
-			iterator operator++(int)noexcept
+			constexpr iterator operator++(int)noexcept
 			{
 				iterator tmp = *this;
 				this->operator++();
 				return tmp;
 			}
-			iterator& operator--()noexcept
+			constexpr iterator& operator--()noexcept
 			{
 				Node_ptr tmp = last;
 				last = (Node_ptr)((last->p) ^ ((size_t)(current)));
 				current = tmp;
 				return *this;
 			}
-			iterator operator--(int)noexcept
+			constexpr iterator operator--(int)noexcept
 			{
 				iterator tmp = *this;
 				this->operator--();
 				return tmp;
 			}
-			T& operator*()const noexcept
+			constexpr T& operator*()const noexcept
 			{
 				return *((T*)(current + 1));
 			}
-			T* operator->()const noexcept
+			constexpr T* operator->()const noexcept
 			{
 				return ((T*)(current + 1));
 			}
-			bool operator==(const iterator& other)const noexcept
+			constexpr bool operator==(const iterator& other)const noexcept
 			{
 				return (last == other.last) && (current == other.current);
 			}
@@ -103,11 +149,15 @@ namespace Yc
 		};
 		class const_iterator:public iterator
 		{
-			const T& operator*()const noexcept
+		public:
+			using iterator::iterator;
+			constexpr const_iterator(const iterator&other):iterator{other}
+			{}
+			constexpr const T& operator*()const noexcept
 			{
 				return this->iterator::operator*();
 			}
-			const T* operator->()const noexcept
+			constexpr const T* operator->()const noexcept
 			{
 				return this->iterator::operator->();
 			}
@@ -117,90 +167,90 @@ namespace Yc
 			using reference = const T&;
 			using iterator_category = std::bidirectional_iterator_tag;
 		};
-		iterator begin()noexcept
+		constexpr iterator begin()noexcept
 		{
 			iterator ret( (Node_ptr)nullptr,&head );
 			++ret;
 			return ret;
 		}
-		iterator end()noexcept
+		constexpr iterator end()noexcept
 		{
 			iterator ret(& tail, (Node_ptr)nullptr );
 			--ret;
 			return ret;
 		}
-		const_iterator begin()const noexcept
+		constexpr const_iterator begin()const noexcept
 		{
-			iterator ret((Node_ptr)nullptr, &head);
+			iterator ret((Node_ptr)nullptr, (Node_ptr)&head);
 			++ret;
 			return ret;
 		}
-		const_iterator end()const noexcept
+		constexpr const_iterator end()const noexcept
 		{
-			iterator ret(&tail, (Node_ptr)nullptr);
+			iterator ret((Node_ptr)( &tail) , (Node_ptr)nullptr);
 			--ret;
 			return ret;
 		}
-		const_iterator cbegin()const noexcept
+		constexpr const_iterator cbegin()const noexcept
 		{
 			return begin();
 		}
-		const_iterator cend()const noexcept
+		constexpr const_iterator cend()const noexcept
 		{
 			return end();
 		}
-		iterator rbegin()noexcept
+		constexpr iterator rbegin()noexcept
 		{
 			iterator ret(nullptr, &tail);
 			++ret;
 			return ret;
 		}
-		iterator rend()noexcept
+		constexpr iterator rend()noexcept
 		{
 			iterator ret(&head, nullptr);
 			--ret;
 			return ret;
 		}
-		const_iterator rbegin()const noexcept
+		constexpr const_iterator rbegin()const noexcept
 		{
 			iterator ret(nullptr, &tail);
 			++ret;
 			return ret;
 		}
-		const_iterator rend()const noexcept
+		constexpr const_iterator rend()const noexcept
 		{
 			iterator ret(&head, nullptr);
 			--ret;
 			return ret;
 		}
-		const_iterator crbegin()const noexcept
+		constexpr const_iterator crbegin()const noexcept
 		{
 			return rbegin();
 		}
-		const_iterator crend()const noexcept
+		constexpr const_iterator crend()const noexcept
 		{
 			return rend();
 		}
-		static iterator make_reverse_iterator(iterator i)noexcept
+		static constexpr iterator make_reverse_iterator(iterator i)noexcept
 		{
 			std::swap(i.last, i.current);
 			return i;
 		}
-		T& front()noexcept
+		constexpr T& front()noexcept
 		{
 			return *begin();
 		}
-		const T& front()const noexcept
+		constexpr const T& front()const noexcept
 		{
 			return *begin();
 		}
-		T& back()noexcept
+		constexpr T& back()noexcept
 		{
 			auto tmp = end();
 			--tmp;
 			return *tmp;
 		}
-		const T& back()const noexcept
+		constexpr const T& back()const noexcept
 		{
 			auto tmp = end();
 			--tmp;
@@ -210,7 +260,8 @@ namespace Yc
 		{
 			auto [last, current, next] = i.node_info();
 			auto ptr = get_new_node();
-			new(ptr + 1)T(t);
+			//new(ptr + 1)T(t);
+			alloc_trait::construct(alloc, ptr + 1, t);
 			ptr->p = ((size_t(last)) ^ (size_t(current)));
 			auto llast = Node_ptr((size_t(last->p)) ^ (size_t(current)));
 			last->p = ((size_t)(llast)) ^ ((size_t)(ptr));
@@ -221,7 +272,8 @@ namespace Yc
 		{
 			auto [last, current, next] = i.node_info();
 			auto ptr = get_new_node();
-			new(ptr + 1)T(std::move(t));
+			//new(ptr + 1)T(std::move(t));
+			alloc_trait::construct(alloc, ptr + 1, std::move(t));
 			ptr->p = ((size_t(last)) ^ (size_t(current)));
 			auto llast = Node_ptr((size_t(last->p)) ^ (size_t(current)));
 			last->p = ((size_t)(llast)) ^ ((size_t)(ptr));
@@ -298,7 +350,7 @@ namespace Yc
 				pop_front();
 			}
 		}
-		void swap(xor_list& other)noexcept
+		void swap(xor_list& other)noexcept(noexcept(std::swap(alloc,other.alloc)))
 		{
 			if (std::addressof(other) == this)
 			{
@@ -310,6 +362,7 @@ namespace Yc
 				{
 					return;
 				}
+				alloc = other.alloc;
 				size_t h = other.head.p;
 				auto ptr_h = (Node_ptr)(h ^ (size_t((void*)nullptr)));
 				size_t t = other.tail.p;
@@ -332,6 +385,7 @@ namespace Yc
 				{
 					return other.swap(*this);
 				}
+				std::swap(alloc, other.alloc);
 				size_t h1 = other.head.p,t1=other.tail.p,h2=head.p,t2=tail.p;
 				Node_ptr ph1 = Node_ptr(h1 ^ (size_t((void*)nullptr)));
 				Node_ptr ph2 = Node_ptr(h2 ^ (size_t((void*)nullptr)));
@@ -582,6 +636,10 @@ namespace Yc
 				pop_front();
 			}
 		}
+		constexpr static size_t max_size()noexcept
+		{
+			return -1;
+		}
 		using value_type = T;
 		using reference = T&;
 		using const_reference = const T&;
@@ -589,6 +647,7 @@ namespace Yc
 		using reverse_iterator = iterator;
 		using const_reverse_iterator = const_iterator;
 		using difference_type = ptrdiff_t;
+		using size_type = size_t;
 	};
 	template<class T>
 	bool operator==(const xor_list<T>& l, const xor_list<T>& r)noexcept(noexcept(std::declval<T>()== std::declval<T>()))
