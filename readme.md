@@ -14,7 +14,7 @@ template<
 
 在 `Yc::xor_list` 内或在数个 `Yc::xor_list` 间添加、移除和移动元素不会使引用失效。但是只要有任意两个相邻的元素分开，或者其中一个元素消失，或者头尾元素的位置发生变动，指向这些元素的迭代器都会失效。
 
-`Yc::xor_list` 满足[_容器 (Container)_](https://zh.cppreference.com/w/cpp/named_req/Container)，[_序列容器 (SequenceContainer)_](https://zh.cppreference.com/w/cpp/named_req/SequenceContainer)，及[_可逆容器 (ReversibleContainer)_](https://zh.cppreference.com/w/cpp/named_req/ReversibleContainer)要求。目前尚不满足[_知分配器容器 (AllocatorAwareContainer)_](https://zh.cppreference.com/w/cpp/named_req/AllocatorAwareContainer)，将在日后满足。
+`Yc::xor_list` 满足[_容器 (Container)_](https://zh.cppreference.com/w/cpp/named_req/Container)，[_序列容器 (SequenceContainer)_](https://zh.cppreference.com/w/cpp/named_req/SequenceContainer)，及[_可逆容器 (ReversibleContainer)_](https://zh.cppreference.com/w/cpp/named_req/ReversibleContainer)，[_知分配器容器 (AllocatorAwareContainer)_](https://zh.cppreference.com/w/cpp/named_req/AllocatorAwareContainer)要求。
 
 ## 模板参数
 
