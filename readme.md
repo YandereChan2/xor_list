@@ -59,7 +59,7 @@ template<
 |`end`<br>`cend`|返回指向末尾的迭代器<br>（公开成员函数）|
 |`rbegin`<br>`crbegin`|返回指向起始的逆向迭代器<br>（公开成员函数）|
 |`rend`<br>`crend`|返回指向末尾的逆向迭代器<br>（公开成员函数）|
-|`make_reverse_iterator`|从迭代器构造同类型的反向迭代器，指向原迭代器的上一个元素（静态公开成员函数）|
+|`make_reverse_iterator`|从迭代器构造同类型的反向迭代器，指向原迭代器的上一个元素<br>（静态公开成员函数）|
 
 ### 容量
 
@@ -98,4 +98,4 @@ template<
 |||
 |:-|:-|
 |`operator==`<br>`operator<=>`（尚未实现）|按照字典顺序比较两个 `xor_list` 的值<br>（函数模板）|
-|`Yc::swap`|交换内容（函数模板）|
+|`Yc::swap`|交换内容<br>（函数模板）|
