@@ -1,5 +1,6 @@
 #pragma once
 #include<memory>
+#include<algorithm>
 namespace Yc
 {
 	namespace details
@@ -662,6 +663,11 @@ namespace Yc
 			}
 		}
 		return it1 == l.end() && it2 == r.end();
+	}
+	template<class T>
+	auto operator<=>(const xor_list<T>& l, const xor_list<T>& r)
+	{
+		return std::lexicographical_compare_three_way(l.begin(), l.end(), r.begin(), r.end());
 	}
 	template<class T>
 	void swap(xor_list<T>& l, xor_list<T>& r)
