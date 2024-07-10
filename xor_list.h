@@ -296,7 +296,7 @@ namespace Yc
 		iterator erase(iterator i)
 		{
 			auto [last, current, next] = i.node_info();
-			std::destroy_at<T>((T*)(current + 1));
+			std::allocator_traits<Alloc>::destroy(alloc, (T*)(current + 1));
 			delete_node(current);
 			(last->p )^= (size_t)current;
 			(last->p )^= (size_t)next;
