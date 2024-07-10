@@ -237,6 +237,11 @@ namespace Yc
 			std::swap(i.last, i.current);
 			return i;
 		}
+		static constexpr const_iterator make_reverse_iterator(const_iterator i)noexcept
+		{
+			std::swap(i.last, i.current);
+			return i;
+		}
 		constexpr T& front()noexcept
 		{
 			return *begin();
