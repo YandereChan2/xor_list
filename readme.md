@@ -20,7 +20,7 @@ template<
 
 | | |
 |:-----|:-----|
-|`T`|元素的类型，至少应当满足[_可擦除 (Erasable)_](https://zh.cppreference.com/w/cpp/named_req/Erasable)，但是一些函数提出了更高的要求。|
+|`T`|元素的类型，至少应当满足[_可擦除 (Erasable)_](https://zh.cppreference.com/w/cpp/named_req/Erasable)，但是一些成员函数提出了更高的要求。|
 |`Allocator`|用于获取/释放内存及构造/析构内存中元素的分配器。类型必须满足[_分配器 (Allocator)_](https://zh.cppreference.com/w/cpp/named_req/Allocator)。|
 
 ## 成员类型
@@ -59,14 +59,14 @@ template<
 |`end`<br>`cend`|返回指向末尾的迭代器<br>（公开成员函数）|
 |`rbegin`<br>`crbegin`|返回指向起始的逆向迭代器<br>（公开成员函数）|
 |`rend`<br>`crend`|返回指向末尾的逆向迭代器<br>（公开成员函数）|
-|`make_reverse_iterator`|从迭代器构造同类型的反向迭代器，指向原迭代器的上一个元素<br>（静态公开成员函数）|
+|[`make_reverse_iterator`](/make_reverse_iterator.md)|从迭代器构造同类型的反向迭代器，指向原迭代器的上一个元素<br>（静态公开成员函数）|
 
 ### 容量
 
 |||
 |:-|:-|
-|`empty`|检查容器是否为空<br>（公开成员函数）|
-|`max_size`|返回最大可能的元素数量<br>（公开静态成员函数）|
+|[`empty`](/empty.md)|检查容器是否为空<br>（公开成员函数）|
+|[`max_size`](/max_size.md)|返回最大可能的元素数量<br>（公开静态成员函数）|
 
 ### 修改器
 
