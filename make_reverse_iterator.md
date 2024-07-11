@@ -5,7 +5,7 @@
 |`constexpr static iterator make_reverse_iterator(iterator it) noexcept;`|(1)|
 |`constexpr static const_iterator make_reverse_iterator(const_iterator it) noexcept;`|(2)|
 
-构造指向迭代器 `it` 所指向的元素的上一个元素（即 `--it` 所指向的元素）的反向迭代器。
+构造指向迭代器 `it` 所指向的元素的上一个元素（即 `std::prev(it)` 所指向的元素）的反向迭代器。
 
 ## 参数
 

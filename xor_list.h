@@ -267,7 +267,22 @@ namespace Yc
 			auto [last, current, next] = i.node_info();
 			auto ptr = get_new_node();
 			//new(ptr + 1)T(t);
-			alloc_trait::construct(alloc, ptr + 1, t);
+			if constexpr (std::is_nothrow_copy_constructible_v<T>)
+			{
+				alloc_trait::construct(alloc, ptr + 1, t);
+			}
+			else
+			{
+				try
+				{
+					alloc_trait::construct(alloc, ptr + 1, t);
+				}
+				catch (...)
+				{
+					delete_node(ptr);
+					throw;
+				}
+			}
 			ptr->p = ((size_t(last)) ^ (size_t(current)));
 			auto llast = Node_ptr((size_t(last->p)) ^ (size_t(current)));
 			last->p = ((size_t)(llast)) ^ ((size_t)(ptr));
@@ -278,8 +293,22 @@ namespace Yc
 		{
 			auto [last, current, next] = i.node_info();
 			auto ptr = get_new_node();
-			//new(ptr + 1)T(std::move(t));
-			alloc_trait::construct(alloc, ptr + 1, std::move(t));
+			if constexpr (std::is_nothrow_move_constructible_v<T>)
+			{
+				alloc_trait::construct(alloc, ptr + 1, std::move(t));
+			}
+			else
+			{
+				try
+				{
+					alloc_trait::construct(alloc, ptr + 1, std::move(t));
+				}
+				catch (...)
+				{
+					delete_node(ptr);
+					throw;
+				}
+			}
 			ptr->p = ((size_t(last)) ^ (size_t(current)));
 			auto llast = Node_ptr((size_t(last->p)) ^ (size_t(current)));
 			last->p = ((size_t)(llast)) ^ ((size_t)(ptr));
@@ -291,7 +320,22 @@ namespace Yc
 		{
 			auto [last, current, next] = i.node_info();
 			auto ptr = get_new_node();
-			new(ptr + 1)T(std::forward<Args>(args)...);
+			if constexpr (noexcept(new(ptr + 1)T(std::forward<Args>(args)...)))
+			{
+				alloc_trait::construct(alloc, ptr + 1, std::forward<Args>(args)...);
+			}
+			else
+			{
+				try
+				{
+					alloc_trait::construct(alloc, ptr + 1, std::forward<Args>(args)...);
+				}
+				catch (...)
+				{
+					delete_node(ptr);
+					throw;
+				}
+			}
 			ptr->p = ((size_t(last)) ^ (size_t(current)));
 			auto llast = Node_ptr((size_t(last->p)) ^ (size_t(current)));
 			last->p = ((size_t)(llast)) ^ ((size_t)(ptr));
@@ -320,9 +364,9 @@ namespace Yc
 			insert(begin(), std::move(t));
 		}
 		template<class... Args>
-		void emplace_front(Args&&... args)
+		T& emplace_front(Args&&... args)
 		{
-			emplace(begin(), std::forward(args)...);
+			return *emplace(begin(), std::forward(args)...);
 		}
 		void pop_front()
 		{
@@ -339,10 +383,10 @@ namespace Yc
 			insert(it, std::move(t));
 		}
 		template<class... Args>
-		void emplace_back(Args&&... args)
+		T& emplace_back(Args&&... args)
 		{
 			auto it = end();
-			emplace(it, std::forward(args)...);
+			return *emplace(it, std::forward<Args>(args)...);
 		}
 		void pop_back()
 		{
@@ -356,7 +400,7 @@ namespace Yc
 				pop_front();
 			}
 		}
-		void swap(xor_list& other)noexcept(noexcept(std::swap(alloc,other.alloc)))
+		void swap(xor_list& other)noexcept(noexcept(std::allocator_traits<Alloc>::is_always_equal::value))
 		{
 			if (std::addressof(other) == this)
 			{
@@ -368,7 +412,10 @@ namespace Yc
 				{
 					return;
 				}
-				alloc = other.alloc;
+				if constexpr (std::allocator_traits<decltype(alloc)>::propagate_on_container_swap::value)
+				{
+					swap(alloc, other.alloc);
+				}
 				size_t h = other.head.p;
 				auto ptr_h = (Node_ptr)(h ^ (size_t((void*)nullptr)));
 				size_t t = other.tail.p;
@@ -391,7 +438,10 @@ namespace Yc
 				{
 					return other.swap(*this);
 				}
-				std::swap(alloc, other.alloc);
+				if constexpr (std::allocator_traits<decltype(alloc)>::propagate_on_container_swap::value)
+				{
+					swap(alloc, other.alloc);
+				}
 				size_t h1 = other.head.p,t1=other.tail.p,h2=head.p,t2=tail.p;
 				Node_ptr ph1 = Node_ptr(h1 ^ (size_t((void*)nullptr)));
 				Node_ptr ph2 = Node_ptr(h2 ^ (size_t((void*)nullptr)));
@@ -502,7 +552,7 @@ namespace Yc
 			return c;
 		}
 		template<class UnaryPredicate>
-			requires requires(UnaryPredicate u) { u(std::declval<T>()); }
+			//requires requires(UnaryPredicate u) { u(std::declval<T>()); }
 		size_t remove_if(UnaryPredicate u)
 		{
 			auto it = begin();
@@ -519,15 +569,20 @@ namespace Yc
 		}
 		void merge(xor_list& other)
 		{
+			if (std::addressof(other) == this)
+			{
+				return;
+			}
+			auto op = std::less<>;
 			auto it1 = begin();
 			auto it2 = other.begin();
 			while (it2 != other.end() && it1 != end())
 			{
-				if (*it2 < *it1)
+				if (op(*it2 , *it1))
 				{
 					auto it3 = it2;
 					it3++;
-					while (it3 != other.end() && *it3 < *it1)
+					while (it3 != other.end() && op(*it3 , *it1))
 					{
 						it3++;
 					}
@@ -548,15 +603,20 @@ namespace Yc
 		}
 		void merge(xor_list&& other)
 		{
+			if (std::addressof(other) == this)
+			{
+				return;
+			}
+			auto op = std::less<>;
 			auto it1 = begin();
 			auto it2 = other.begin();
 			while (it2 != other.end() && it1 != end())
 			{
-				if (*it2 < *it1)
+				if (op(*it2, *it1))
 				{
 					auto it3 = it2;
 					it3++;
-					while (it3 != other.end() && *it3 < *it1)
+					while (it3 != other.end() && op(*it3, *it1))
 					{
 						it3++;
 					}
@@ -569,15 +629,19 @@ namespace Yc
 				{
 					it1++;
 				}
-				if (it1 == end())
-				{
-					splice(it1, other);
-				}
+			}
+			if (it1 == end())
+			{
+				splice(it1, other);
 			}
 		}
 		template<class compare>
 		void merge(xor_list& other, compare comp)
 		{
+			if (std::addressof(other) == this)
+			{
+				return;
+			}
 			auto it1 = begin();
 			auto it2 = other.begin();
 			while (it2 != other.end() && it1 != end())
@@ -608,6 +672,10 @@ namespace Yc
 		template<class compare>
 		void merge(xor_list&& other, compare comp)
 		{
+			if (std::addressof(other) == this)
+			{
+				return;
+			}
 			auto it1 = begin();
 			auto it2 = other.begin();
 			while (it2 != other.end() && it1 != end())
@@ -674,8 +742,8 @@ namespace Yc
 	{
 		return std::lexicographical_compare_three_way(l.begin(), l.end(), r.begin(), r.end());
 	}
-	template<class T>
-	void swap(xor_list<T>& l, xor_list<T>& r)
+	template<class T,class Alloc>
+	void swap(xor_list<T,Alloc>& l, xor_list<T,Alloc>& r)noexcept(noexcept(l.swap(r)))
 	{
 		l.swap(r);
 	}

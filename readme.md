@@ -59,6 +59,8 @@ template<
 |`end`<br>`cend`|返回指向末尾的迭代器<br>（公开成员函数）|
 |`rbegin`<br>`crbegin`|返回指向起始的逆向迭代器<br>（公开成员函数）|
 |`rend`<br>`crend`|返回指向末尾的逆向迭代器<br>（公开成员函数）|
+|_`before_begin`_|返回起始迭代器的前驱迭代器<br>（*仅用于阐释的私有成员函数）|
+|_`after_end`_|返回末尾迭代器的后继迭代器<br>（*仅用于阐释的私有成员函数）|
 |[`make_reverse_iterator`](/make_reverse_iterator.md)|从迭代器构造同类型的反向迭代器，指向原迭代器的上一个元素<br>（静态公开成员函数）|
 
 ### 容量
@@ -72,17 +74,17 @@ template<
 
 |||
 |:-|:-|
-|`clear`|清除内容<br>（公开成员函数）|
-|`insert`|插入元素<br>（公开成员函数）|
-|`emplace`|原位构造元素<br>（公开成员函数）|
-|`erase`|擦除元素<br>（公开成员函数）|
-|`push_back`|将元素添加到容器末尾<br>（公开成员函数）|
-|`emplace_back`|在容器末尾原位构造元素<br>（公开成员函数）|
-|`pop_back`|移除末元素<br>（公开成员函数）|
-|`push_front`|插入元素到容器起始<br>（公开成员函数）|
-|`emplace_front`|在容器头部原位构造元素<br>（公开成员函数）|
-|`pop_front`|移除首元素<br>（公开成员函数）|
-|`swap`|交换内容<br>（公开成员函数）|
+|[`clear`](/clear.md)|清除内容<br>（公开成员函数）|
+|[`insert`](/insert.md)|插入元素<br>（公开成员函数）|
+|[`emplace`](/emplace.md)|原位构造元素<br>（公开成员函数）|
+|[`erase`](/erase.md)|擦除元素<br>（公开成员函数）|
+|[`push_back`](/push_back.md)|将元素添加到容器末尾<br>（公开成员函数）|
+|[`emplace_back`](/emplace_back.md)|在容器末尾原位构造元素<br>（公开成员函数）|
+|[`pop_back`](/pop_back.md)|移除末元素<br>（公开成员函数）|
+|[`push_front`](/push_front.md)|插入元素到容器起始<br>（公开成员函数）|
+|[`emplace_front`](/emplace_front.md)|在容器头部原位构造元素<br>（公开成员函数）|
+|[`pop_front`](/pop_front.md)|移除首元素<br>（公开成员函数）|
+|[`swap`](/swap.md)|交换内容<br>（公开成员函数）|
 
 ### 操作
 
@@ -91,7 +93,7 @@ template<
 |`merge`|合并两个有序列表<br>（公开成员函数）|
 |`splice`|从另一个 `xor_list` 中移动元素<br>（公开成员函数）|
 |`remove`<br>`remove_if`|移除满足特定标准的元素<br>（公开成员函数）|
-|`reverse`|反转元素的顺序<br>（公开成员函数）|
+|[`reverse`](/reverse.md)|反转元素的顺序<br>（公开成员函数）|
 |`unique`|删除连续的重复元素<br>（公开成员函数）|
 
 ### 非成员函数
@@ -99,4 +101,4 @@ template<
 |||
 |:-|:-|
 |`operator==`<br>`operator<=>`|按照字典顺序比较两个 `xor_list` 的值<br>（函数模板）|
-|`Yc::swap`|交换内容<br>（函数模板）|
+|[`Yc::swap`](/adl_swap.md)|交换内容<br>（函数模板）|
