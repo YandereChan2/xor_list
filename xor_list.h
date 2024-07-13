@@ -464,6 +464,14 @@ namespace Yc
 		}
 		auto splice(iterator pos,iterator first, iterator last)noexcept
 		{
+			struct ret_t
+			{
+				iterator pos1, first1, last1;
+			};
+			if (first == last)[[unlikely]]
+			{
+				return ret_t{ pos, first, last };
+			}
 			auto [prev, current, next] = pos.node_info();
 			auto [prev1, current1, next1] = first.node_info();
 			auto [prev2, current2, next2] = last.node_info();
@@ -479,10 +487,7 @@ namespace Yc
 			current->p ^= (size_t)prev2;
 			prev2->p ^= (size_t)current2;
 			prev2->p ^= (size_t)current;
-			struct
-			{
-				iterator pos1, first1, last1;
-			}ret{ {prev2,current},{prev,current1},{prev1,current2} };
+			ret_t ret{ {prev2,current},{prev,current1},{prev1,current2} };
 			return ret;
 		}
 		iterator splice(iterator pos,xor_list& other)noexcept
@@ -496,7 +501,18 @@ namespace Yc
 			{
 				return;
 			}
-			std::swap(head.p, tail.p);
+			if (std::next(begin()) == end())
+			{
+				return;
+			}
+			auto [last1, current1, next1] = begin().node_info();
+			auto [last2, current2, next2] = end().node_info();
+			head.p = (size_t)((Node_ptr)nullptr) ^ (size_t)last2;
+			tail.p = (size_t)((Node_ptr)nullptr) ^ (size_t)current1;
+			last2->p ^= (size_t)current2;
+			last2->p ^= (size_t)&head;
+			current1->p ^= (size_t)last1;
+			current1->p ^= (size_t)&tail;
 		}
 		void unique()
 		{
@@ -573,7 +589,7 @@ namespace Yc
 			{
 				return;
 			}
-			auto op = std::less<>;
+			auto op = std::less<>{};
 			auto it1 = begin();
 			auto it2 = other.begin();
 			while (it2 != other.end() && it1 != end())
@@ -587,6 +603,7 @@ namespace Yc
 						it3++;
 					}
 					auto [pos, first, last] = splice(it1, it2, it3);
+					
 					it1 = pos;
 					it2 = last;
 					it1++;
@@ -607,7 +624,7 @@ namespace Yc
 			{
 				return;
 			}
-			auto op = std::less<>;
+			auto op = std::less<>{};
 			auto it1 = begin();
 			auto it2 = other.begin();
 			while (it2 != other.end() && it1 != end())
@@ -663,10 +680,11 @@ namespace Yc
 				{
 					it1++;
 				}
-				if (it1 == end())
-				{
-					splice(it1, other);
-				}
+				
+			}
+			if (it1 == end())
+			{
+				splice(it1, other);
 			}
 		}
 		template<class compare>
@@ -697,11 +715,55 @@ namespace Yc
 				{
 					it1++;
 				}
-				if (it1 == end())
-				{
-					splice(it1, other);
-				}
+				
 			}
+			if (it1 == end())
+			{
+				splice(it1, other);
+			}
+		}
+		template<class Comp>
+		void sort(Comp comp)noexcept(noexcept(comp(std::declval<T>(), std::declval<T>())))
+		{
+			if (empty())
+			{
+				return;
+			}
+			auto it = begin();
+			if (std::next(it) == end())
+			{
+				return;
+			}
+			it++;
+			if (std::next(it) == end())
+			{
+				if (!comp(front(), back()))
+				{
+					reverse();
+				}
+				return;
+			}
+			auto it1 = begin();
+			auto it2 = begin();
+			while ( std::next(it2) != end()&&std::next(std::next(it2)) != end())
+			{
+				it1++;
+				it2++;
+				it2++;
+			}
+			auto tmp = xor_list(alloc);
+			tmp.splice(tmp.end(), std::next(it1), end());
+			sort(comp);
+			tmp.sort(comp);
+			merge(tmp, comp);
+			if (!tmp.empty())
+			{
+				std::unreachable();
+			}
+		}
+		void sort()noexcept(noexcept(std::less<>{}(std::declval<T>(), std::declval<T>())))
+		{
+			return sort(std::less<>{});
 		}
 		~xor_list()
 		{
