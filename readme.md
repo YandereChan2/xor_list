@@ -29,10 +29,11 @@ template<
 |:-|:-|
 |`value_type`|`T`|
 |`allocator_type`|`Allocator`|
+|`size_type`|`size_t`|
 |`difference_type`|`ptrdiff_t`|
 |`reference`|`T&`|
 |`const reference`|`const T&`|
-|`iterator`|指向 `value_type` 的[_老式双向迭代器 (LegacyBidirectionalIterator)_](https://zh.cppreference.com/w/cpp/named_req/BidirectionalIterator)|
+|[`iterator`](/iterator.md)|指向 `value_type` 的[_老式双向迭代器 (LegacyBidirectionalIterator)_](https://zh.cppreference.com/w/cpp/named_req/BidirectionalIterator)|
 |`const_iterator`|指向 `const value_type` 的[_老式双向迭代器 (LegacyBidirectionalIterator)_](https://zh.cppreference.com/w/cpp/named_req/BidirectionalIterator)|
 |`reverse_iterator`|`iterator`|
 |`const_reverse_iterator`|`const_iterator`|
@@ -43,6 +44,7 @@ template<
 |:-|:-|
 |（构造函数）|构造 `xor_list` <br>（公开成员函数）|
 |[（析构函数）](/destructor.md)|析构 `xor_list` <br>（公开成员函数）|
+|[`get_allocator`](/get_allocator.md)|返回关联的分配器<br>（公开成员函数）|
 
 ### 元素访问
 
@@ -90,11 +92,12 @@ template<
 
 |||
 |:-|:-|
-|`merge`|合并两个有序列表<br>（公开成员函数）|
-|`splice`|从另一个 `xor_list` 中移动元素<br>（公开成员函数）|
+|[`merge`](/merge.md)|合并两个有序列表<br>（公开成员函数）|
+|[`splice`](/splice.md)|从另一个 `xor_list` 中移动元素<br>（公开成员函数）|
 |`remove`<br>`remove_if`|移除满足特定标准的元素<br>（公开成员函数）|
 |[`reverse`](/reverse.md)|反转元素的顺序<br>（公开成员函数）|
 |`unique`|删除连续的重复元素<br>（公开成员函数）|
+|`sort`|对元素进行排序<br>（公开成员函数）|
 
 ### 非成员函数
 
