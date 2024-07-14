@@ -142,6 +142,10 @@ namespace Yc
 			{
 				return (last == other.last) && (current == other.current);
 			}
+			void turn_around()noexcept
+			{
+				std::swap(last, current);
+			}
 			using value_type = T;
 			using difference_type = ptrdiff_t;
 			using pointer = T*;
@@ -514,16 +518,17 @@ namespace Yc
 			current1->p ^= (size_t)last1;
 			current1->p ^= (size_t)&tail;
 		}
-		void unique()
+		size_t unique()
 		{
 			if (empty())
 			{
 				return;
 			}
+			size_t ret{};
 			iterator i1 = begin();
 			iterator i2 = begin();
 			i2++;
-			xor_list tmp;
+			xor_list tmp{ alloc };
 			while (i2 != end())
 			{
 				if (*i1 != *i2)
@@ -533,9 +538,11 @@ namespace Yc
 				}
 				else
 				{
+					ret++;
 					i2++;
 					while (i2!=end()&&*i1==*i2)
 					{
+						ret++;
 						i2++;
 					}
 					i1++;
@@ -548,10 +555,55 @@ namespace Yc
 					}
 					else
 					{
-						return;
+						return ret;
 					}
 				}
 			}
+			return ret;
+		}
+		template< class BinaryPredicate >
+		size_t unique(BinaryPredicate p)
+		{
+			if (empty())
+			{
+				return;
+			}
+			size_t ret{};
+			iterator i1 = begin();
+			iterator i2 = begin();
+			i2++;
+			xor_list tmp{ alloc };
+			while (i2 != end())
+			{
+				if (!p(*i1,*i2))
+				{
+					i1++;
+					i2++;
+				}
+				else
+				{
+					ret++;
+					i2++;
+					while (i2 != end() && p(*i1, *i2))
+					{
+						ret++;
+						i2++;
+					}
+					i1++;
+					auto [_1, _2, it] = tmp.splice(tmp.begin(), i1, i2);
+					if (it != end())
+					{
+						i1 = it;
+						it++;
+						i2 = it;
+					}
+					else
+					{
+						return ret;
+					}
+				}
+			}
+			return ret;
 		}
 		size_t remove(const T& t)
 		{

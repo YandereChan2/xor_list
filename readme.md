@@ -57,10 +57,10 @@ template<
 
 |||
 |:-|:-|
-|`begin`<br>`cbegin`|返回指向起始的迭代器<br>（公开成员函数）|
-|`end`<br>`cend`|返回指向末尾的迭代器<br>（公开成员函数）|
-|`rbegin`<br>`crbegin`|返回指向起始的逆向迭代器<br>（公开成员函数）|
-|`rend`<br>`crend`|返回指向末尾的逆向迭代器<br>（公开成员函数）|
+|[`begin`<br>`cbegin`](/begin.md)|返回指向起始的迭代器<br>（公开成员函数）|
+|[`end`<br>`cend`](/end.md)|返回指向末尾的迭代器<br>（公开成员函数）|
+|[`rbegin`<br>`crbegin`](/rbegin.md)|返回指向起始的逆向迭代器<br>（公开成员函数）|
+|[`rend`<br>`crend`](/rend.md)|返回指向末尾的逆向迭代器<br>（公开成员函数）|
 |_`before_begin`_|返回起始迭代器的前驱迭代器<br>（*仅用于阐释的私有成员函数）|
 |_`after_end`_|返回末尾迭代器的后继迭代器<br>（*仅用于阐释的私有成员函数）|
 |[`make_reverse_iterator`](/make_reverse_iterator.md)|从迭代器构造同类型的反向迭代器，指向原迭代器的上一个元素<br>（静态公开成员函数）|
@@ -94,10 +94,10 @@ template<
 |:-|:-|
 |[`merge`](/merge.md)|合并两个有序列表<br>（公开成员函数）|
 |[`splice`](/splice.md)|从另一个 `xor_list` 中移动元素<br>（公开成员函数）|
-|`remove`<br>`remove_if`|移除满足特定标准的元素<br>（公开成员函数）|
+|[`remove`<br>`remove_if`](/remove.md)|移除满足特定标准的元素<br>（公开成员函数）|
 |[`reverse`](/reverse.md)|反转元素的顺序<br>（公开成员函数）|
-|`unique`|删除连续的重复元素<br>（公开成员函数）|
-|`sort`|对元素进行排序<br>（公开成员函数）|
+|[`unique`](/unique.md)|删除连续的重复元素<br>（公开成员函数）|
+|[`sort`](/sort.md)|对元素进行排序<br>（公开成员函数）|
 
 ### 非成员函数
 
